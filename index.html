@@ -154,3 +154,40 @@ db.collection("messages")
 
 </body>
 </html>
+<script>
+// Ask permission
+if (Notification.permission !== "granted") {
+  Notification.requestPermission();
+}
+</script>
+<script>
+let lastIdeaTime = 0;
+
+db.collection("ideas")
+  .orderBy("time")
+  .onSnapshot(snapshot => {
+    snapshot.docChanges().forEach(change => {
+
+      if (change.type === "added") {
+        const data = change.doc.data();
+
+        // prevent old messages triggering
+        if (data.time > lastIdeaTime) {
+          lastIdeaTime = data.time;
+
+          showNotification(data);
+        }
+      }
+
+    });
+});
+</script>
+<script>
+function showNotification(data) {
+  if (Notification.permission === "granted") {
+    new Notification("🔥 New Roblox Idea!", {
+      body: data.name + " submitted: " + data.game
+    });
+  }
+}
+</script>
